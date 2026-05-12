@@ -1,0 +1,79 @@
+.hotel-card {
+  @apply bg-card rounded-lg overflow-hidden border hover-lift cursor-pointer animate-scale-in;
+}
+
+.hotel-card-image-wrapper {
+  @apply relative aspect-video overflow-hidden;
+}
+
+.hotel-card-image {
+  @apply w-full h-full object-cover transition-transform duration-300 hover:scale-110;
+}
+
+.hotel-card-favorite {
+  @apply absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors;
+}
+
+.hotel-card-favorite.active {
+  @apply text-destructive;
+}
+
+.hotel-card-unavailable-badge {
+  @apply absolute top-3 left-3;
+}
+
+.hotel-card-content {
+  @apply p-4 flex flex-col gap-3;
+}
+
+.hotel-card-header {
+  @apply flex items-start justify-between gap-2;
+}
+
+.hotel-card-title {
+  @apply font-semibold text-lg line-clamp-1;
+}
+
+.hotel-card-rating {
+  @apply flex items-center gap-1 text-sm font-medium shrink-0;
+}
+
+.hotel-card-review-count {
+  @apply text-muted-foreground;
+}
+
+.hotel-card-location {
+  @apply flex items-center gap-1 text-sm text-muted-foreground;
+}
+
+.hotel-card-description {
+  @apply text-sm text-muted-foreground line-clamp-2;
+}
+
+.hotel-card-details {
+  @apply flex items-center justify-between;
+}
+
+.hotel-card-detail-item {
+  @apply flex items-center gap-1 text-sm text-muted-foreground;
+}
+
+.hotel-card-amenities {
+  @apply flex flex-wrap gap-2;
+}
+
+.hotel-card-footer {
+  @apply flex items-center justify-between pt-3 border-t;
+}
+
+.hotel-card-price {
+  @apply flex flex-col;
+}
+
+.hotel-card-price-amount {
+  @apply text-2xl font-bold text-primary;
+}
+
+.hotel-card-price-period {
+  @apply text-xs text-muted-foreground;
+}

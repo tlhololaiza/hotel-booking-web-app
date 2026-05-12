@@ -1,0 +1,49 @@
+.header {
+  @apply sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+}
+
+.header-container {
+  @apply container mx-auto flex h-16 items-center justify-between px-4;
+}
+
+.header-logo {
+  @apply flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity;
+}
+
+.header-logo-text {
+  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+}
+
+.header-nav-desktop {
+  @apply hidden md:flex items-center gap-6 ml-auto mr-6;
+}
+
+.header-nav-link {
+  @apply text-sm font-medium text-foreground/80 hover:text-primary transition-colors;
+}
+
+.header-actions-desktop {
+  @apply hidden md:flex items-center gap-2;
+}
+
+.notification-badge {
+  @apply absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs;
+}
+
+.header-mobile-menu-btn {
+  @apply md:hidden;
+}
+
+@media (min-width: 768px) {
+  .header-mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+.header-mobile-menu {
+  @apply md:hidden border-t bg-background p-4 flex flex-col gap-2 animate-slide-up;
+}
+
+.header-mobile-link {
+  @apply text-sm font-medium text-foreground/80 hover:text-primary transition-colors py-2;
+}
