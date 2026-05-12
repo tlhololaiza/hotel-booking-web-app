@@ -8,11 +8,11 @@
 }
 
 .search-bar-icon {
-  @apply absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none z-10;
+  @apply absolute right-3 h-4 w-4 text-muted-foreground pointer-events-none z-10;
 }
 
 .search-bar-input {
-  @apply pl-10 w-full;
+  @apply pr-12 w-full;
 }
 
 .search-bar-button {

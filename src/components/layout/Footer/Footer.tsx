@@ -43,7 +43,7 @@ export const Footer = () => {
               </li>
               <li>
                 <MapPin className="h-4 w-4" />
-                <span>123 Hotel Street, NY 10001</span>
+                <span>123 Pretoria, South Africa</span>
               </li>
             </ul>
           </div>
