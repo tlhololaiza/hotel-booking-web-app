@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +14,12 @@ import { toast } from 'sonner';
 const Profile = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { currentUser, bookings, updateUserProfile } = useApp();
+  const { currentUser, updateUserProfile } = useAuth();
+  const { bookings } = useApp();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: currentUser?.name || '',
-    email: currentUser?.email || '',
-    phone: currentUser?.phone || '',
+    displayName: currentUser?.displayName || '',
+    phone: '',
   });
 
   if (!currentUser) {
@@ -26,14 +27,20 @@ const Profile = () => {
     return null;
   }
 
-  const userBookings = bookings.filter(b => b.userId === currentUser.id);
+  const userBookings = bookings.filter(b => b.userId === currentUser.uid);
   const activeTab = searchParams.get('tab') || 'profile';
 
-  const handleUpdate = (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateUserProfile(formData);
-    setEditing(false);
-    toast.success('Profile updated successfully!');
+    try {
+      await updateUserProfile({
+        displayName: formData.displayName,
+      });
+      setEditing(false);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -69,13 +76,13 @@ const Profile = () => {
               {editing ? (
                 <form onSubmit={handleUpdate} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="displayName">Full Name</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        id="displayName"
+                        value={formData.displayName}
+                        onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
                         className="pl-10"
                       />
                     </div>
@@ -88,9 +95,9 @@ const Profile = () => {
                       <Input
                         id="email"
                         type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="pl-10"
+                        value={currentUser.email || ''}
+                        disabled
+                        className="pl-10 bg-muted"
                       />
                     </div>
                   </div>
@@ -122,7 +129,7 @@ const Profile = () => {
                     <User className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">{currentUser.name}</p>
+                      <p className="font-medium">{currentUser.displayName || 'Not set'}</p>
                     </div>
                   </div>
 
@@ -138,7 +145,7 @@ const Profile = () => {
                     <Phone className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="font-medium">{currentUser.phone || 'Not provided'}</p>
+                      <p className="font-medium">{'Not provided'}</p>
                     </div>
                   </div>
                 </div>

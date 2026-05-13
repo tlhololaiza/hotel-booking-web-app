@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +13,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Edit, Trash2, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 
+const ADMIN_EMAILS = [
+  'admin@luxstay.com',
+  'admin@example.com',
+];
+
 const Admin = () => {
   const navigate = useNavigate();
-  const { currentUser, hotels, bookings, addHotel, updateBooking, deleteHotel } = useApp();
+  const { currentUser } = useAuth();
+  const { hotels, bookings, addHotel, updateBooking, deleteHotel } = useApp();
   const [addHotelDialogOpen, setAddHotelDialogOpen] = useState(false);
 
-  if (!currentUser || currentUser.role !== 'admin') {
+  // Check if current user is admin
+  const isAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email || '');
+
+  if (!currentUser || !isAdmin) {
     navigate('/');
     return null;
   }
@@ -70,7 +80,7 @@ const Admin = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <Badge variant="secondary" className="text-base px-4 py-2">
-            {currentUser.role}
+            Admin
           </Badge>
         </div>
 

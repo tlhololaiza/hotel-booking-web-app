@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,21 +8,42 @@ import { Card } from '@/components/ui/card';
 import { Hotel, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
+const ADMIN_EMAILS = [
+  'admin@luxstay.com',
+  'admin@example.com',
+];
+
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useApp();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (login(email, password, isAdmin ? 'admin' : 'user')) {
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await login(email, password);
       toast.success('Login successful!');
-      navigate(isAdmin ? '/admin' : '/');
-    } else {
-      toast.error('Invalid credentials');
+      
+      // Check if user is admin and redirect accordingly
+      if (ADMIN_EMAILS.includes(email)) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || 'Login failed';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,6 +76,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -71,25 +93,13 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="admin"
-              checked={isAdmin}
-              onChange={(e) => setIsAdmin(e.target.checked)}
-              className="rounded"
-            />
-            <Label htmlFor="admin" className="cursor-pointer">
-              Login as Admin
-            </Label>
-          </div>
-
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
 
           <div className="relative my-6">
@@ -101,7 +111,7 @@ const Login = () => {
             </div>
           </div>
 
-          <Button type="button" variant="outline" className="w-full">
+          <Button type="button" variant="outline" className="w-full" disabled={isLoading}>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Hotel, User, Bell, Heart, LogOut, Menu, X } from 'lucide-react';
+import { Hotel, User, Bell, Heart, LogOut, Menu, X, Settings } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,16 +14,27 @@ import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
 import './Header.css';
 
+const ADMIN_EMAILS = [
+  'admin@luxstay.com',
+  'admin@example.com',
+];
+
 export const Header = () => {
-  const { currentUser, logout, notifications } = useApp();
+  const { currentUser, logout } = useAuth();
+  const { notifications } = useApp();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  const unreadCount = notifications.filter(n => !n.read && n.userId === currentUser?.id).length;
+  const isAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email || '');
+  const unreadCount = notifications.filter(n => !n.read && n.userId === currentUser?.uid).length;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -38,9 +50,9 @@ export const Header = () => {
           <Link to="/hotels" className="header-nav-link">
             Hotels
           </Link>
-          {currentUser?.role === 'admin' && (
+          {isAdmin && (
             <Link to="/admin" className="header-nav-link">
-              Admin Panel
+              Admin Dashboard
             </Link>
           )}
         </nav>
@@ -63,6 +75,17 @@ export const Header = () => {
                 )}
               </Button>
 
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate('/admin')}
+                  title="Admin Dashboard"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -78,6 +101,15 @@ export const Header = () => {
                     <Heart className="mr-2 h-4 w-4" />
                     Favorites
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -115,9 +147,9 @@ export const Header = () => {
           <Link to="/hotels" className="header-mobile-link" onClick={() => setMobileMenuOpen(false)}>
             Hotels
           </Link>
-          {currentUser?.role === 'admin' && (
+          {isAdmin && (
             <Link to="/admin" className="header-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-              Admin Panel
+              Admin Dashboard
             </Link>
           )}
           {currentUser ? (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,25 +8,54 @@ import { Card } from '@/components/ui/card';
 import { Hotel, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
+const ADMIN_EMAILS = [
+  'admin@luxstay.com',
+  'admin@example.com',
+];
+
 const Register = () => {
   const navigate = useNavigate();
-  const { login } = useApp();
+  const { signup } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
 
-    if (login(email, password)) {
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signup(email, password, name);
       toast.success('Account created successfully!');
-      navigate('/');
+      
+      // Check if user is admin and redirect accordingly
+      if (ADMIN_EMAILS.includes(email)) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || 'Registration failed';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +88,7 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -75,6 +105,7 @@ const Register = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -91,6 +122,7 @@ const Register = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -107,12 +139,13 @@ const Register = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="pl-10"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Sign Up
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
 
           <div className="relative my-6">
@@ -124,7 +157,7 @@ const Register = () => {
             </div>
           </div>
 
-          <Button type="button" variant="outline" className="w-full">
+          <Button type="button" variant="outline" className="w-full" disabled={isLoading}>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
